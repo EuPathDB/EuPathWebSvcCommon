@@ -40,6 +40,8 @@ public abstract class AbstractOracleTextSearchPlugin extends AbstractPlugin {
   public static final String COLUMN_DATASETS = "Datasets";
   public static final String COLUMN_MAX_SCORE = "MaxScore";
 
+  private static final int MAX_RESULT_SIZE = 20000;
+
   /*
    * (non-Javadoc)
    * 
@@ -139,16 +141,14 @@ public abstract class AbstractOracleTextSearchPlugin extends AbstractPlugin {
   private static String join(ArrayList<String> parts, String delimiter) {
     boolean notFirstChunk = false;
 
-    StringBuffer conjunction = new StringBuffer("");
+    StringBuilder conjunction = new StringBuilder();
 
     for (String part : parts) {
       if (notFirstChunk) {
         conjunction.append(delimiter);
-      }
+      } else notFirstChunk = true;
 
       conjunction.append(part);
-
-      notFirstChunk = true;
     }
 
     return conjunction.toString();
@@ -193,6 +193,10 @@ public abstract class AbstractOracleTextSearchPlugin extends AbstractPlugin {
           SearchResult match = getSearchResults(rs, sourceId);
           matches.put(sourceId, match);
         }
+
+        // only read to max number of rows
+        if (matches.size() >= MAX_RESULT_SIZE)
+          break;
       }
       logger.info("finished fetching rows");
     } catch (SQLException ex) {
@@ -273,10 +277,18 @@ public abstract class AbstractOracleTextSearchPlugin extends AbstractPlugin {
   }
 
   protected SearchResult[] getMatchesSortedArray(
-      Map<String, SearchResult> matches) {
+      Map<String, SearchResult> matches, StringBuilder message) {
     Collection<SearchResult> matchCollection = matches.values();
     SearchResult[] matchArray = matchCollection.toArray(new SearchResult[0]);
+    matches.clear();
     Arrays.sort(matchArray);
-    return matchArray;
+
+    // only return the max number of rows
+    if (matchArray.length > MAX_RESULT_SIZE) { // results are truncated
+      message.append("The text search can only process the first " + MAX_RESULT_SIZE + " records."
+          + "Please refine your search with more specific keywords.");
+      return Arrays.copyOf(matchArray, MAX_RESULT_SIZE);
+    } else
+      return matchArray;
   }
 }
