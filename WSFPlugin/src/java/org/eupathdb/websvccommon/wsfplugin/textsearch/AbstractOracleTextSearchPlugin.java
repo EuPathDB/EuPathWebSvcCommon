@@ -17,7 +17,7 @@ import org.eupathdb.websvccommon.wsfplugin.EuPathServiceException;
 import org.gusdb.wdk.model.WdkModelException;
 import org.gusdb.wdk.model.dbms.ConnectionContainer;
 import org.gusdb.wsf.plugin.AbstractPlugin;
-import org.gusdb.wsf.plugin.WsfRequest;
+import org.gusdb.wsf.plugin.PluginRequest;
 import org.gusdb.wsf.plugin.WsfServiceException;
 
 /**
@@ -69,7 +69,7 @@ public abstract class AbstractOracleTextSearchPlugin extends AbstractPlugin {
    * @see org.gusdb.wsf.plugin.WsfPlugin#validateParameters(java.util.Map)
    */
   @Override
-  public void validateParameters(WsfRequest request) throws WsfServiceException {
+  public void validateParameters(PluginRequest request) throws WsfServiceException {
     // do nothing in this plugin
   }
 
