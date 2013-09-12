@@ -5,5 +5,7 @@
 	<classpathentry combineaccessrules="false" kind="src" path="/WSF Plugin"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/WDK Model"/>
 	<classpathentry kind="lib" path="/WSF Plugin/lib/java/log4j-1.2.17.jar"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/WDK Controller"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/ApiCommon Shared Model"/>
 	<classpathentry kind="output" path="classes"/>
 </classpath>
