@@ -3,11 +3,13 @@
  */
 package org.eupathdb.websvccommon.wsfplugin;
 
+import org.gusdb.wsf.plugin.WsfServiceException;
+
 /**
  * @author jerric
  * 
  */
-public class EuPathServiceException extends Exception {
+public class EuPathServiceException extends WsfServiceException {
 
   /**
    * 

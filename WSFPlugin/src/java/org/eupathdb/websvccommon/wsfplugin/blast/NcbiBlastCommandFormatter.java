@@ -9,11 +9,13 @@ import java.util.Map;
 import org.apache.log4j.Logger;
 import org.gusdb.wsf.plugin.WsfServiceException;
 
-public class NcbiBlastCommandFormatter implements CommandFormatter {
+public abstract class NcbiBlastCommandFormatter implements CommandFormatter {
 
   private static final Logger logger = Logger.getLogger(NcbiBlastCommandFormatter.class);
-  
-  private BlastConfig config;
+
+  protected BlastConfig config;
+
+  public abstract String getBlastDatabase(Map<String, String> params);
 
   @Override
   public void setConfig(BlastConfig config) {
@@ -21,20 +23,44 @@ public class NcbiBlastCommandFormatter implements CommandFormatter {
   }
 
   @Override
-  public String[] formatCommand(Map<String, String> params, File seqFile, File outFile) throws IOException,
-      WsfServiceException {
-    
+  public String[] formatCommand(Map<String, String> params, File seqFile,
+      File outFile) throws IOException, WsfServiceException {
     // now prepare the commandline
     List<String> cmds = new ArrayList<String>();
     cmds.add(config.getBlastPath() + "blastall");
-    
-    String dbOrgs = params.remove(AbstractBlastPlugin.PARAM_DATABASE_ORGANISM);
 
-    // String blastApp = getBlastProgram(qType, dbType);
+    // get the algorithm
+    String blastApp = params.remove(AbstractBlastPlugin.PARAM_ALGORITHM);
+    cmds.add("-p");
+    cmds.add(blastApp);
 
-    String blastApp = params.remove(EuPathDBBlastPlugin.PARAM_ALGORITHM);
+    // get the blast database
+    String blastDbs = getBlastDatabase(params);
+    cmds.add("-d");
+    cmds.add(blastDbs);
 
-    String blastDbs = getBlastDatabase(dbType, dbOrgs);
+    // add the input and output file
+    cmds.add("-i");
+    cmds.add(seqFile.getAbsolutePath());
+    cmds.add("-o");
+    cmds.add(outFile.getAbsolutePath());
+
+    for (String paramName : params.keySet()) {
+      if (paramName.equals(AbstractBlastPlugin.PARAM_EVALUE)) {
+        cmds.add("-e");
+        cmds.add(params.get(paramName));
+      } else if (paramName.equals(AbstractBlastPlugin.PARAM_MAX_ALIGNMENTS)) {
+        String alignments = params.get(paramName);
+        cmds.add("-b");
+        cmds.add(alignments);
+        cmds.add("-v");
+        cmds.add(alignments);
+      } else if (paramName.equals(AbstractBlastPlugin.PARAM_FILTER)) {
+        cmds.add("-F");
+        cmds.add(params.get(paramName).equals("yes") ? "m S" : "F");
+      }
+    }
+
     cmds.add("-p");
     cmds.add(blastApp);
     cmds.add("-d");
@@ -43,29 +69,6 @@ public class NcbiBlastCommandFormatter implements CommandFormatter {
     cmds.add(seqFile.getAbsolutePath());
     cmds.add("-o");
     cmds.add(outFile.getAbsolutePath());
-    
-    // add extra options into the command
-    String extraOptions = config.getExtraOptions();
-    if (extraOptions != null && extraOptions.trim().length() > 0)
-        cmds.add(extraOptions);
-
-    for (String param : params.keySet()) {
-
-        if (param.equals("-filter")) {
-            cmds.add("-F");
-            if (params.get(param).equals("yes")) cmds.add("T");
-            else cmds.add("F");
-        }
-
-        if (!param.equals("-p") && !param.equals("-d")
-                && !param.equals("-i") && !param.equals("-o")
-                && !param.equals("-filter")) {
-            cmds.add(param);
-            cmds.add(params.get(param));
-        }
-    }
-    logger.debug(blastDbs + " inferred from (" + dbType + ", '" + dbOrgs
-            + "')");
     logger.debug(blastApp);// + " inferred from (" + qType + ", " + dbType
     // + ")");
 

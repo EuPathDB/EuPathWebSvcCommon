@@ -1,7 +1,6 @@
 package org.eupathdb.websvccommon.wsfplugin.blast;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.Properties;
@@ -16,14 +15,14 @@ public class BlastConfig {
   /**
    * This is the only required field in the config file.
    */
-  private static final String FIELD_BLAST_PATH = "BlastPath";
+  public static final String FIELD_BLAST_PATH = "BlastPath";
 
   // The following properties are optional, and a default is provided for each.
-  private static final String FIELD_TEMP_PATH = "TempPath";
-  private static final String FIELD_EXTRA_OPTIONS = "ExtraOptions";
-  private static final String FIELD_TIMEOUT = "Timeout";
-  private static final String FIELD_IDENTIFIER_REGEX = "IdentifierRegex";
-  private static final String FIELD_ORGANISM_REGEX = "OrganismRegex";
+  public static final String FIELD_TEMP_PATH = "TempPath";
+  public static final String FIELD_EXTRA_OPTIONS = "ExtraOptions";
+  public static final String FIELD_TIMEOUT = "Timeout";
+  public static final String FIELD_IDENTIFIER_REGEX = "IdentifierRegex";
+  public static final String FIELD_ORGANISM_REGEX = "OrganismRegex";
 
   // default values for the optional properties
   private static final String DEFAULT_TEMP_PATH = "/var/www/Common/tmp/blast";

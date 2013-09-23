@@ -5,173 +5,181 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
+import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.regex.Matcher;
 
-import org.apache.log4j.Logger;
-import org.gusdb.wdk.model.WdkModelException;
-import org.gusdb.wdk.model.WdkUserException;
+import org.eupathdb.websvccommon.wsfplugin.EuPathServiceException;
+import org.gusdb.wsf.plugin.PluginResponse;
+import org.gusdb.wsf.plugin.WsfServiceException;
 
 public class NcbiBlastResultFormatter extends AbstractResultFormatter {
 
-  public static final String newline = System.getProperty("line.separator");
-
-  private static final Logger logger = Logger.getLogger(NcbiBlastResultFormatter.class);
+  private static final String DB_TYPE_GENOME = "Genome";
 
   @Override
-  public String[][] formatResult(String[] orderedColumns, File outFile,
-      String dbType, String recordClass, StringBuffer message)
-      throws IOException, WdkModelException, WdkUserException, SQLException {
-    // create a map of <column/position>
-    Map<String, Integer> columns = new HashMap<String, Integer>(
-        orderedColumns.length);
-    for (int i = 0; i < orderedColumns.length; i++) {
-      columns.put(orderedColumns[i], i);
-    }
-    // map of <source_id, [organism,tabular_row]>
-    Map<String, String[]> rows = new HashMap<String, String[]>();
-    List<String[]> blocks = new ArrayList<String[]>();
-    StringBuilder header = new StringBuilder();
-    StringBuilder footer = new StringBuilder();
+  public String formatResult(PluginResponse response, String[] orderedColumns,
+      File outFile, String recordClass, String dbType)
+      throws WsfServiceException {
 
-    // open output file, and read it
+    // read and parse the output
+    StringBuilder content = new StringBuilder();
+    Map<String, String> summaries = new LinkedHashMap<>();
     String line;
-    BufferedReader reader = new BufferedReader(new FileReader(outFile));
     try {
-      boolean hasHits = false;
-      // read the header section
+      BufferedReader reader = new BufferedReader(new FileReader(outFile));
+      boolean inSummary = false, inAlignment = false;
+      StringBuilder alignment = new StringBuilder();
       while ((line = reader.readLine()) != null) {
-        header.append(line).append(newline);
-        if (line.startsWith("Sequence")) { // found summary section
-          hasHits = true;
-          break;
-        } else if (line.indexOf("No hits found") >= 0) {
-          // no hit in the result
-          break;
-        }
-      }
-
-      // check status
-      if (!hasHits) { // can be either no hits, or an error output
-        // if not an error output, read the rest of the output
-        if (line != null) {
-          while ((line = reader.readLine()) != null) {
-            header.append(line).append(newline);
+        String lineTrimmed = line.trim();
+        if (inSummary) { // in summary section
+          if (lineTrimmed.length() == 0) {
+            // found the end of summary section, no need to output empty line,
+            // since it's already been written to the content.
+            inSummary = false;
+          } else {
+            // get source id, and store the summary line for later process,
+            // since
+            // some of the info here might be truncated, and can only be
+            // processed
+            // with the info from the correlated alignment section.
+            String sourceId = getField(line, findSourceId(line));
+            summaries.put(sourceId, line);
+          }
+        } else if (inAlignment) {
+          if (lineTrimmed.startsWith("Database:")) { // end of alignment section
+            inAlignment = false;
+            // process previous alignment
+            processAlignment(response, orderedColumns, recordClass, dbType,
+                summaries, alignment.toString());
+            content.append(line).append(newline);
+          } else {
+            if (line.startsWith(">")) { // start of a new alignment
+              // process previous alignment
+              processAlignment(response, orderedColumns, recordClass, dbType,
+                  summaries, alignment.toString());
+              alignment = new StringBuilder();
+            }
+            alignment.append(line).append(newline);
+          }
+        } else { // not in summary nor in alignment
+          content.append(line).append(newline);
+          if (lineTrimmed.startsWith("Sequences producing significant alignments")) {
+            // found the start of the summary section
+            inSummary = true;
+            content.append(newline + MACRO_SUMMARY + newline + newline);
+          } else if (line.startsWith(">")) {
+            // found the first alignment section
+            inAlignment = true;
+            content.append(newline + MACRO_ALIGNMENT + newline + newline);
           }
         }
-        // write the full output into message, and return empty results
-        message.append(header.toString());
-        return new String[0][columns.size()];
       }
-
-      // read tabular part, which starts after the second empty line
-      line = reader.readLine(); // skip an empty line
-      while ((line = reader.readLine()) != null) {
-        if (line.trim().length() == 0)
-          break;
-        // get source id
-        int[] sourceIdPos = findSourceId(line);
-        String sourceId = line.substring(sourceIdPos[0], sourceIdPos[1]);
-
-        // get organism
-        int[] organismPos = findOrganism(line);
-        String organism = line.substring(organismPos[0], organismPos[1]);
-        logger.debug("Organism extracted from defline is: " + organism);
-        // insert the url linking to
-        line = insertIdUrl(line, recordClass);
-        if (line != null)
-          rows.put(sourceId, new String[] { organism, line });
-      }
-
-      // extract alignment blocks
-      StringBuilder block = new StringBuilder();
-      String[] alignment = null;
-      while ((line = reader.readLine()) != null) {
-        // reach the footer part
-        if (line.trim().startsWith("Database")) {
-          // output the last block, if have
-          if (alignment != null) {
-            alignment[columns.get(NcbiBlastPlugin.COLUMN_ALIGNMENT)] = block.toString();
-            blocks.add(alignment);
-          }
-          break;
-        }
-
-        // reach a new start of alignment block
-        if (line.length() > 0 && line.charAt(0) == '>') {
-          // output the previous block, if have
-          if (alignment != null) {
-            alignment[columns.get(NcbiBlastPlugin.COLUMN_ALIGNMENT)] = block.toString();
-            blocks.add(alignment);
-          }
-          // create a new alignment and block
-          alignment = new String[orderedColumns.length];
-          block = new StringBuilder();
-
-          block.append(line + newline);
-
-          // to handle two-line definitions in ORFs
-          String secondLine = reader.readLine();
-          if (secondLine != null) {
-            block.append(secondLine + newline);
-            line = line.trim() + secondLine.trim();
-          }
-
-          // extract source id
-          int[] sourceIdPos = findSourceId(line);
-          String sourceId = line.substring(sourceIdPos[0], sourceIdPos[1]);
-
-          // insert the organism url
-          line = insertIdUrl(line, recordClass);
-          if (line != null)
-            alignment[columns.get(NcbiBlastPlugin.COLUMN_ID)] = sourceId;
-        } else {
-          // add this line to the block
-          block.append(line + newline);
-        }
-      }
-
-      // get the rest as the footer part
-      footer.append(line + newline);
-      while ((line = reader.readLine()) != null) {
-        footer.append(line + newline);
-      }
-    } finally {
       reader.close();
+    } catch (IOException ex) {
+      throw new EuPathServiceException(ex);
     }
-
-    // now reconstruct the result
-    int size = Math.max(1, blocks.size());
-    String[][] results = new String[size][orderedColumns.length];
-    for (int i = 0; i < blocks.size(); i++) {
-      String[] alignment = blocks.get(i);
-      // copy ID
-      int idIndex = columns.get(NcbiBlastPlugin.COLUMN_ID);
-      results[i][idIndex] = alignment[idIndex];
-      // copy block
-      int blockIndex = columns.get(NcbiBlastPlugin.COLUMN_ALIGNMENT);
-      results[i][blockIndex] = alignment[blockIndex];
-      // copy tabular row
-      int rowIndex = columns.get(NcbiBlastPlugin.COLUMN_SUMMARY);
-      for (String id : rows.keySet()) {
-        if (alignment[idIndex].startsWith(id)) {
-          String[] parts = rows.get(id);
-          String organism = parts[0];
-          String tabularRow = parts[1];
-          results[i][rowIndex] = tabularRow;
-          int projectIdIndex = columns.get(NcbiBlastPlugin.COLUMN_PROJECT_ID);
-          String projectId = projectMapper.getProjectByOrganism(organism);
-          results[i][projectIdIndex] = projectId;
-          break;
-        }
-      }
-    }
-    // copy the header and footer
-    results[0][columns.get(NcbiBlastPlugin.COLUMN_HEADER)] = header.toString();
-    results[size - 1][columns.get(NcbiBlastPlugin.COLUMN_FOOTER)] = footer.toString();
-    return results;
+    return content.toString();
   }
 
+  private void processAlignment(PluginResponse response, String[] columns,
+      String recordClass, String dbType, Map<String, String> summaries,
+      String alignment) throws WsfServiceException {
+    try {
+      // get the defline, and get organism from it
+      String defline = alignment.substring(0, alignment.indexOf("Length = "));
+      String organism = getField(defline, findOrganism(defline));
+      String projectId = projectMapper.getProjectByOrganism(organism);
+
+      // get the source id in the alignment, and insert a link there
+      int[] sourceIdLocation = findSourceId(alignment);
+      String sourceId = getField(defline, sourceIdLocation);
+      String idUrl = getIdUrl(recordClass, projectId, sourceId);
+      alignment = insertUrl(alignment, sourceIdLocation, idUrl);
+
+      // get score and e-value from summary;
+      String summary = summaries.get(sourceId);
+      String evalue = getField(summary, findEvalue(summary));
+      int score = Integer.valueOf(getField(summary, findScore(summary)));
+
+      // insert id url into the summary
+      insertUrl(summary, findSourceId(summary), idUrl);
+
+      // insert the gbrowse link if the DB type is genome
+      if (dbType.equals(DB_TYPE_GENOME))
+        alignment = insertGbrowseLink(alignment, projectId, sourceId);
+
+      // format and write the row
+      String[] row = formatRow(columns, projectId, sourceId, summary,
+          alignment, evalue, score);
+      response.addRow(row);
+    } catch (SQLException ex) {
+      throw new EuPathServiceException(ex);
+    }
+  }
+
+  private String insertGbrowseLink(String alignment, String projectId,
+      String sourceId) {
+    StringBuilder buffer = new StringBuilder();
+    String[] pieces = alignment.split("Positives =");
+    for (String piece : pieces) {
+      if (buffer.length() > 0)
+        buffer.append("Positives = ");
+      Matcher matcher = SUBJECT_PATTERN.matcher(piece);
+      int min = Integer.MAX_VALUE, max = Integer.MIN_VALUE;
+      while (matcher.find()) {
+        int start = Integer.valueOf(matcher.group(1));
+        int end = Integer.valueOf(matcher.group(2));
+        if (min > start)
+          min = start;
+        if (min > end)
+          min = end;
+        if (max < start)
+          max = start;
+        if (max < end)
+          max = end;
+      }
+      // check if any subject has been found
+      if (min <= max) {
+        String gb_url = projectMapper.getBaseUrl(projectId);
+        gb_url += "/cgi-bin/gbrowse/" + projectId.toLowerCase() + "/?name="
+            + sourceId + ":" + min + "-" + max;
+        buffer.append("\n<a href=\"" + gb_url + "\"> <B><font color=\"red\">"
+            + "Link to Genome Browser</font></B></a>,   Positives = ");
+      } else if (buffer.length() > 0)
+        buffer.append("Positives = ");
+      buffer.append(piece);
+    }
+    return buffer.toString();
+  }
+
+  private String[] formatRow(String[] columns, String projectId,
+      String sourceId, String summary, String alignment, String evalue,
+      int score) throws EuPathServiceException {
+    String[] evalueParts = evalue.split("e");
+    String evalueExp = (evalueParts.length == 2) ? evalueParts[1] : "0";
+    String evalueMant = evalueParts[0];
+    String[] row = new String[columns.length];
+    for (int i = 0; i < columns.length; i++) {
+      if (columns[i].equals(AbstractBlastPlugin.COLUMN_ALIGNMENT)) {
+        row[i] = alignment;
+      } else if (columns[i].equals(AbstractBlastPlugin.COLUMN_EVALUE_EXP)) {
+        row[i] = evalueExp;
+      } else if (columns[i].equals(AbstractBlastPlugin.COLUMN_EVALUE_MANT)) {
+        row[i] = evalueMant;
+      } else if (columns[i].equals(AbstractBlastPlugin.COLUMN_IDENTIFIER)) {
+        row[i] = sourceId;
+      } else if (columns[i].equals(AbstractBlastPlugin.COLUMN_PROJECT_ID)) {
+        row[i] = projectId;
+      } else if (columns[i].equals(AbstractBlastPlugin.COLUMN_SCORE)) {
+        row[i] = Integer.toString(score);
+      } else if (columns[i].equals(AbstractBlastPlugin.COLUMN_SUMMARY)) {
+        row[i] = summary;
+      } else {
+        throw new EuPathServiceException("Unsupported blast result column: "
+            + columns[i]);
+      }
+    }
+    return row;
+  }
 }

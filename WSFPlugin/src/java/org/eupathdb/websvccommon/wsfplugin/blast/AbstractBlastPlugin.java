@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.sql.SQLException;
 import java.util.Date;
 import java.util.Map;
 
@@ -14,7 +13,6 @@ import org.apache.log4j.Logger;
 import org.apidb.apicommon.model.ProjectMapper;
 import org.gusdb.wdk.controller.CConstants;
 import org.gusdb.wdk.model.WdkModelException;
-import org.gusdb.wdk.model.WdkUserException;
 import org.gusdb.wdk.model.jspwrap.WdkModelBean;
 import org.gusdb.wsf.plugin.AbstractPlugin;
 import org.gusdb.wsf.plugin.PluginRequest;
@@ -32,15 +30,16 @@ public abstract class AbstractBlastPlugin extends AbstractPlugin {
   public static final String PARAM_RECORD_CLASS = "BlastRecordClass";
   public static final String PARAM_MAX_ALIGNMENTS = "-v";
   public static final String PARAM_EVALUE = "-e";
+  public static final String PARAM_FILTER = "-filter";
 
   // ========== Common blast return columns
-  private static final String COLUMN_IDENTIFIER = "identifier";
-  private static final String COLUMN_PROJECT_ID = "project_id";
-  private static final String COLUMN_EVALUE_MANT = "evalue_mant";
-  private static final String COLUMN_EVALUE_EXP = "evalue_exp";
-  private static final String COLUMN_SCORE = "score";
-  private static final String COLUMN_SUMMARY = "summary";
-  private static final String COLUMN_ALIGNMENT = "alignment";
+  public static final String COLUMN_IDENTIFIER = "identifier";
+  public static final String COLUMN_PROJECT_ID = "project_id";
+  public static final String COLUMN_EVALUE_MANT = "evalue_mant";
+  public static final String COLUMN_EVALUE_EXP = "evalue_exp";
+  public static final String COLUMN_SCORE = "score";
+  public static final String COLUMN_SUMMARY = "summary";
+  public static final String COLUMN_ALIGNMENT = "alignment";
 
   private static final Logger logger = Logger.getLogger(AbstractBlastPlugin.class);
 
@@ -54,6 +53,16 @@ public abstract class AbstractBlastPlugin extends AbstractPlugin {
     this.config = config;
     this.commandFormatter = commandFormatter;
     this.resultFormatter = resultFormatter;
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see org.gusdb.wsf.plugin.AbstractPlugin#defineContextKeys()
+   */
+  @Override
+  protected String[] defineContextKeys() {
+    return new String[] { CConstants.WDK_MODEL_KEY };
   }
 
   @Override
@@ -126,6 +135,7 @@ public abstract class AbstractBlastPlugin extends AbstractPlugin {
     try {
       // get command string
       Map<String, String> params = request.getParams();
+      String dbType = params.get(PARAM_DATA_TYPE);
       File seqFile = getSequenceFile(params);
       File outFile = File.createTempFile(this.getClass().getSimpleName(),
           ".out", config.getTempDir());
@@ -144,18 +154,16 @@ public abstract class AbstractBlastPlugin extends AbstractPlugin {
       // if the invocation succeeds, prepare the result; otherwise,
       // prepare results for failure scenario
       logger.info("\nPreparing the result");
-      StringBuilder message = new StringBuilder();
       String recordClass = params.get(PARAM_RECORD_CLASS);
       String[] orderedColumns = request.getOrderedColumns();
-      resultFormatter.formatResult(response, orderedColumns, outFile,
-          recordClass, output.toString());
+      String message = resultFormatter.formatResult(response, orderedColumns,
+          outFile, recordClass, dbType);
       logger.info("\nResult prepared");
 
-      message.append(newline).append(output);
-
       response.setSignal(signal);
+      response.setMessage(message + output.toString());
       response.flush();
-    } catch (IOException | WdkModelException | WdkUserException | SQLException ex) {
+    } catch (IOException ex) {
       logger.error(ex);
       throw new WsfServiceException(ex);
     } finally {
