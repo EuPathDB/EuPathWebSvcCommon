@@ -4,13 +4,13 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Map;
 
-import org.gusdb.wsf.plugin.WsfServiceException;
+import org.gusdb.wsf.plugin.WsfPluginException;
 
 public interface CommandFormatter {
 
   void setConfig(BlastConfig config);
 
   String[] formatCommand(Map<String, String> params, File seqFile, File outFile)
-      throws WsfServiceException, IOException;
+      throws WsfPluginException, IOException;
 
 }

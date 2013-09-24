@@ -4,7 +4,7 @@ import java.io.File;
 
 import org.apidb.apicommon.model.ProjectMapper;
 import org.gusdb.wsf.plugin.PluginResponse;
-import org.gusdb.wsf.plugin.WsfServiceException;
+import org.gusdb.wsf.plugin.WsfPluginException;
 
 public interface ResultFormatter {
 
@@ -26,9 +26,9 @@ public interface ResultFormatter {
    * @param recordClass
    * @param dbType
    * @return
-   * @throws WsfServiceException
+   * @throws WsfPluginException
    */
   String formatResult(PluginResponse response, String[] orderedColumns,
       File outFile, String recordClass, String dbType)
-      throws WsfServiceException;
+      throws WsfPluginException;
 }

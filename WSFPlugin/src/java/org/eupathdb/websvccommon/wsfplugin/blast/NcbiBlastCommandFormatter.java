@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.log4j.Logger;
-import org.gusdb.wsf.plugin.WsfServiceException;
+import org.gusdb.wsf.plugin.WsfPluginException;
 
 public abstract class NcbiBlastCommandFormatter implements CommandFormatter {
 
@@ -24,7 +24,7 @@ public abstract class NcbiBlastCommandFormatter implements CommandFormatter {
 
   @Override
   public String[] formatCommand(Map<String, String> params, File seqFile,
-      File outFile) throws IOException, WsfServiceException {
+      File outFile) throws IOException, WsfPluginException {
     // now prepare the commandline
     List<String> cmds = new ArrayList<String>();
     cmds.add(config.getBlastPath() + "blastall");

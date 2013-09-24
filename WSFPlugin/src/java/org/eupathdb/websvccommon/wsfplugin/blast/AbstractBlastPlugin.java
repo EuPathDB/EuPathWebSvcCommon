@@ -17,7 +17,7 @@ import org.gusdb.wdk.model.jspwrap.WdkModelBean;
 import org.gusdb.wsf.plugin.AbstractPlugin;
 import org.gusdb.wsf.plugin.PluginRequest;
 import org.gusdb.wsf.plugin.PluginResponse;
-import org.gusdb.wsf.plugin.WsfServiceException;
+import org.gusdb.wsf.plugin.WsfPluginException;
 import org.gusdb.wsf.util.Formatter;
 import org.xml.sax.SAXException;
 
@@ -67,7 +67,7 @@ public abstract class AbstractBlastPlugin extends AbstractPlugin {
 
   @Override
   public void initialize(Map<String, Object> context)
-      throws WsfServiceException {
+      throws WsfPluginException {
     super.initialize(context);
 
     commandFormatter.setConfig(config);
@@ -80,7 +80,7 @@ public abstract class AbstractBlastPlugin extends AbstractPlugin {
       resultFormatter.setProjectMapper(projectMapper);
     } catch (WdkModelException | SAXException | IOException
         | ParserConfigurationException ex) {
-      throw new WsfServiceException(ex);
+      throw new WsfPluginException(ex);
     }
   }
 
@@ -114,7 +114,7 @@ public abstract class AbstractBlastPlugin extends AbstractPlugin {
    */
   @Override
   public void validateParameters(PluginRequest request)
-      throws WsfServiceException {
+      throws WsfPluginException {
     Map<String, String> params = request.getParams();
     for (String param : params.keySet()) {
       logger.debug("Param - name=" + param + ", value=" + params.get(param));
@@ -128,7 +128,7 @@ public abstract class AbstractBlastPlugin extends AbstractPlugin {
    */
   @Override
   public void execute(PluginRequest request, PluginResponse response)
-      throws WsfServiceException {
+      throws WsfPluginException {
     logger.info("Invoking " + getClass().getSimpleName() + "...");
 
     // create temporary files for input sequence and output report
@@ -165,7 +165,7 @@ public abstract class AbstractBlastPlugin extends AbstractPlugin {
       response.flush();
     } catch (IOException ex) {
       logger.error(ex);
-      throw new WsfServiceException(ex);
+      throw new WsfPluginException(ex);
     } finally {
       cleanup();
     }

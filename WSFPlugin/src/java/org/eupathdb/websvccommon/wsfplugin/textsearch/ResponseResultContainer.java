@@ -9,7 +9,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.gusdb.wsf.plugin.PluginResponse;
-import org.gusdb.wsf.plugin.WsfServiceException;
+import org.gusdb.wsf.plugin.WsfPluginException;
 
 import static org.eupathdb.websvccommon.wsfplugin.textsearch.AbstractOracleTextSearchPlugin.*;
 
@@ -41,7 +41,7 @@ public class ResponseResultContainer implements ResultContainer {
    * (org.eupathdb.websvccommon.wsfplugin.textsearch.SearchResult)
    */
   @Override
-  public void addResult(SearchResult result) throws WsfServiceException {
+  public void addResult(SearchResult result) throws WsfPluginException {
     String sourceId = result.getSourceId();
 
     // convert the result to a String[] array
@@ -56,7 +56,7 @@ public class ResponseResultContainer implements ResultContainer {
       } else if (column.equals(COLUMN_MAX_SCORE)) {
         array[columnOrders.get(COLUMN_MAX_SCORE)] = Float.toString(result.getMaxScore());
       } else {
-        throw new WsfServiceException("Unknown column: " + column);
+        throw new WsfPluginException("Unknown column: " + column);
       }
     }
 

@@ -14,7 +14,7 @@ import org.gusdb.wdk.model.WdkModelException;
 import org.gusdb.wdk.model.dbms.ConnectionContainer;
 import org.gusdb.wsf.plugin.AbstractPlugin;
 import org.gusdb.wsf.plugin.PluginRequest;
-import org.gusdb.wsf.plugin.WsfServiceException;
+import org.gusdb.wsf.plugin.WsfPluginException;
 
 /**
  * @author John I
@@ -64,7 +64,7 @@ public abstract class AbstractOracleTextSearchPlugin extends AbstractPlugin {
    */
   @Override
   public void validateParameters(PluginRequest request)
-      throws WsfServiceException {
+      throws WsfPluginException {
     // do nothing in this plugin
   }
 
@@ -175,7 +175,7 @@ public abstract class AbstractOracleTextSearchPlugin extends AbstractPlugin {
   // }
 
   protected void textSearch(ResultContainer results, PreparedStatement query,
-      String primaryKeyColumn) throws WsfServiceException, SQLException {
+      String primaryKeyColumn) throws WsfPluginException, SQLException {
     ResultSet rs = null;
     try {
       logger.info("about to execute text-search query (set org.gusdb logging to \"debug\" to see its text)");
@@ -186,7 +186,7 @@ public abstract class AbstractOracleTextSearchPlugin extends AbstractPlugin {
         String sourceId = rs.getString(primaryKeyColumn);
 
         if (results.hasResult(sourceId)) {
-          throw new WsfServiceException("duplicate sourceId " + sourceId);
+          throw new WsfPluginException("duplicate sourceId " + sourceId);
         }
 
         SearchResult match = getSearchResults(rs, sourceId);
@@ -211,11 +211,11 @@ public abstract class AbstractOracleTextSearchPlugin extends AbstractPlugin {
       } else {
         message = ex.getMessage();
       }
-      throw new WsfServiceException(message, ex);
+      throw new WsfPluginException(message, ex);
     } catch (Exception ex) {
       logger.info("caught Exception " + ex.getMessage());
       ex.printStackTrace();
-      throw new WsfServiceException(ex);
+      throw new WsfPluginException(ex);
     } finally {
       if (rs != null)
         rs.close();

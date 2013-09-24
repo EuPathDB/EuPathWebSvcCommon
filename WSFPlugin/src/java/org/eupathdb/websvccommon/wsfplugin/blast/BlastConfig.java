@@ -5,7 +5,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.Properties;
 
-import org.gusdb.wsf.plugin.WsfServiceException;
+import org.gusdb.wsf.plugin.WsfPluginException;
 
 public class BlastConfig {
 
@@ -33,28 +33,28 @@ public class BlastConfig {
 
   private final Properties properties;
 
-  public BlastConfig(String gusHome) throws WsfServiceException {
+  public BlastConfig(String gusHome) throws WsfPluginException {
     this.properties = new Properties();
     String configFile = gusHome + "/config/" + FILE_CONFIG;
     try {
       properties.load(new FileReader(new File(configFile)));
     } catch (IOException ex) {
-      throw new WsfServiceException(ex);
+      throw new WsfPluginException(ex);
     }
 
     validate();
   }
 
-  public BlastConfig(Properties properties) throws WsfServiceException {
+  public BlastConfig(Properties properties) throws WsfPluginException {
     this.properties = properties;
 
     validate();
   }
 
-  private void validate() throws WsfServiceException {
+  private void validate() throws WsfPluginException {
     // check if required blastPath is specified.
     if (!properties.containsKey(FIELD_BLAST_PATH))
-      throw new WsfServiceException("The required BLAST program path is not "
+      throw new WsfPluginException("The required BLAST program path is not "
           + "specified in the config file.");
 
     // create temp path if it doesn't exist
@@ -65,7 +65,7 @@ public class BlastConfig {
     // timeout has to be positive
     long timeout = getTimeout();
     if (timeout < 1)
-      throw new WsfServiceException("Invalid timeout for blast: " + timeout
+      throw new WsfPluginException("Invalid timeout for blast: " + timeout
           + " seconds. The value must be a positive integer.");
   }
 

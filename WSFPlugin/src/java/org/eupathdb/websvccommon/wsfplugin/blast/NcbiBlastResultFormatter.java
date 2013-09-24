@@ -11,7 +11,7 @@ import java.util.regex.Matcher;
 
 import org.eupathdb.websvccommon.wsfplugin.EuPathServiceException;
 import org.gusdb.wsf.plugin.PluginResponse;
-import org.gusdb.wsf.plugin.WsfServiceException;
+import org.gusdb.wsf.plugin.WsfPluginException;
 
 public class NcbiBlastResultFormatter extends AbstractResultFormatter {
 
@@ -20,7 +20,7 @@ public class NcbiBlastResultFormatter extends AbstractResultFormatter {
   @Override
   public String formatResult(PluginResponse response, String[] orderedColumns,
       File outFile, String recordClass, String dbType)
-      throws WsfServiceException {
+      throws WsfPluginException {
 
     // read and parse the output
     StringBuilder content = new StringBuilder();
@@ -84,7 +84,7 @@ public class NcbiBlastResultFormatter extends AbstractResultFormatter {
 
   private void processAlignment(PluginResponse response, String[] columns,
       String recordClass, String dbType, Map<String, String> summaries,
-      String alignment) throws WsfServiceException {
+      String alignment) throws WsfPluginException {
     try {
       // get the defline, and get organism from it
       String defline = alignment.substring(0, alignment.indexOf("Length = "));
