@@ -145,7 +145,6 @@ public abstract class AbstractBlastPlugin extends AbstractPlugin {
           ".out", config.getTempDir());
       String[] command = commandFormatter.formatCommand(params, seqFile,
           outFile);
-      logger.info("Command prepared: " + Formatter.printArray(command));
 
       // invoke the command
       long timeout = config.getTimeout();
