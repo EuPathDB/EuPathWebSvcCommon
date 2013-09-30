@@ -49,7 +49,7 @@ public abstract class NcbiBlastCommandFormatter implements CommandFormatter {
       if (paramName.equals(AbstractBlastPlugin.PARAM_EVALUE)) {
         cmds.add("-e");
         cmds.add(params.get(paramName));
-      } else if (paramName.equals(AbstractBlastPlugin.PARAM_MAX_ALIGNMENTS)) {
+      } else if (paramName.equals(AbstractBlastPlugin.PARAM_MAX_SUMMARY)) {
         String alignments = params.get(paramName);
         cmds.add("-b");
         cmds.add(alignments);

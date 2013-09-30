@@ -28,7 +28,7 @@ public abstract class AbstractBlastPlugin extends AbstractPlugin {
   public static final String PARAM_ALGORITHM = "BlastAlgorithm";
   public static final String PARAM_SEQUENCE = "BlastQuerySequence";
   public static final String PARAM_RECORD_CLASS = "BlastRecordClass";
-  public static final String PARAM_MAX_ALIGNMENTS = "-v";
+  public static final String PARAM_MAX_SUMMARY = "-b";
   public static final String PARAM_EVALUE = "-e";
   public static final String PARAM_FILTER = "-filter";
 
@@ -96,7 +96,7 @@ public abstract class AbstractBlastPlugin extends AbstractPlugin {
   @Override
   public String[] getRequiredParameterNames() {
     return new String[] { PARAM_DATA_TYPE, PARAM_ALGORITHM, PARAM_SEQUENCE,
-        PARAM_RECORD_CLASS, PARAM_MAX_ALIGNMENTS, PARAM_EVALUE };
+        PARAM_RECORD_CLASS, PARAM_MAX_SUMMARY, PARAM_EVALUE };
   }
 
   /*
