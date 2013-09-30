@@ -1,16 +1,12 @@
 package org.eupathdb.websvccommon.wsfplugin.blast;
 
 import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
 import java.util.Properties;
 
 import org.gusdb.wsf.plugin.WsfPluginException;
 
 public class BlastConfig {
 
-  // field definitions in the config file
-  private static final String FILE_CONFIG = "blast-config.xml";
 
   /**
    * This is the only required field in the config file.
@@ -32,19 +28,6 @@ public class BlastConfig {
   private static final String DEFAULT_ORGANISM_REGEX = "\\|\\s*organism=([^_|\\s]+)";
 
   private final Properties properties;
-
-  public BlastConfig() throws WsfPluginException {
-    this.properties = new Properties();
-    String gusHome = System.getProperty("GUS_HOME");
-    String configFile = gusHome + "/config/" + FILE_CONFIG;
-    try {
-      properties.load(new FileReader(new File(configFile)));
-    } catch (IOException ex) {
-      throw new WsfPluginException(ex);
-    }
-
-    validate();
-  }
 
   public BlastConfig(Properties properties) throws WsfPluginException {
     this.properties = properties;

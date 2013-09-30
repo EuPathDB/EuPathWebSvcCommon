@@ -41,16 +41,20 @@ public abstract class AbstractBlastPlugin extends AbstractPlugin {
   public static final String COLUMN_SUMMARY = "summary";
   public static final String COLUMN_ALIGNMENT = "alignment";
 
+  // field definitions in the config file
+  private static final String FILE_CONFIG = "blast-config.xml";
+
   private static final Logger logger = Logger.getLogger(AbstractBlastPlugin.class);
 
   // ========== member variables ==========
-  private final BlastConfig config;
   private final CommandFormatter commandFormatter;
   private final ResultFormatter resultFormatter;
 
-  public AbstractBlastPlugin(BlastConfig config,
-      CommandFormatter commandFormatter, ResultFormatter resultFormatter) {
-    this.config = config;
+  private BlastConfig config;
+
+  public AbstractBlastPlugin(CommandFormatter commandFormatter,
+      ResultFormatter resultFormatter) {
+    super(FILE_CONFIG);
     this.commandFormatter = commandFormatter;
     this.resultFormatter = resultFormatter;
   }
@@ -66,10 +70,10 @@ public abstract class AbstractBlastPlugin extends AbstractPlugin {
   }
 
   @Override
-  public void initialize(Map<String, Object> context)
-      throws WsfPluginException {
+  public void initialize(Map<String, Object> context) throws WsfPluginException {
     super.initialize(context);
 
+    config = new BlastConfig(properties);
     commandFormatter.setConfig(config);
     resultFormatter.setConfig(config);
 
