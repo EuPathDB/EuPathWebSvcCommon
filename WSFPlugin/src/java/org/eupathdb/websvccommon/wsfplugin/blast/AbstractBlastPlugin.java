@@ -10,7 +10,7 @@ import java.util.Map;
 import javax.xml.parsers.ParserConfigurationException;
 
 import org.apache.log4j.Logger;
-import org.apidb.apicommon.model.ProjectMapper;
+import org.eupathdb.common.model.ProjectMapper;
 import org.gusdb.wdk.controller.CConstants;
 import org.gusdb.wdk.model.WdkModelException;
 import org.gusdb.wdk.model.jspwrap.WdkModelBean;
@@ -18,7 +18,6 @@ import org.gusdb.wsf.plugin.AbstractPlugin;
 import org.gusdb.wsf.plugin.PluginRequest;
 import org.gusdb.wsf.plugin.PluginResponse;
 import org.gusdb.wsf.plugin.WsfPluginException;
-import org.gusdb.wsf.util.Formatter;
 import org.xml.sax.SAXException;
 
 public abstract class AbstractBlastPlugin extends AbstractPlugin {

@@ -2,7 +2,7 @@ package org.eupathdb.websvccommon.wsfplugin.blast;
 
 import java.io.File;
 
-import org.apidb.apicommon.model.ProjectMapper;
+import org.eupathdb.common.model.ProjectMapper;
 import org.gusdb.wsf.plugin.PluginResponse;
 import org.gusdb.wsf.plugin.WsfPluginException;
 

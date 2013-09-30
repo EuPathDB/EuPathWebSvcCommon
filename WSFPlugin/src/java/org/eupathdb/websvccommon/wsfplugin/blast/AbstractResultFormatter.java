@@ -6,7 +6,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.log4j.Logger;
-import org.apidb.apicommon.model.ProjectMapper;
+import org.eupathdb.common.model.ProjectMapper;
 import org.eupathdb.websvccommon.wsfplugin.EuPathServiceException;
 
 public abstract class AbstractResultFormatter implements ResultFormatter {
