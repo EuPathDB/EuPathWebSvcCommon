@@ -61,17 +61,6 @@ public abstract class NcbiBlastCommandFormatter implements CommandFormatter {
       }
     }
 
-    cmds.add("-p");
-    cmds.add(blastApp);
-    cmds.add("-d");
-    cmds.add(blastDbs);
-    cmds.add("-i");
-    cmds.add(seqFile.getAbsolutePath());
-    cmds.add("-o");
-    cmds.add(outFile.getAbsolutePath());
-    logger.debug(blastApp);// + " inferred from (" + qType + ", " + dbType
-    // + ")");
-
     String[] cmdArray = new String[cmds.size()];
     cmds.toArray(cmdArray);
     return cmdArray;
