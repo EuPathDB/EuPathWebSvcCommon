@@ -33,8 +33,9 @@ public class BlastConfig {
 
   private final Properties properties;
 
-  public BlastConfig(String gusHome) throws WsfPluginException {
+  public BlastConfig() throws WsfPluginException {
     this.properties = new Properties();
+    String gusHome = System.getProperty("GUS_HOME");
     String configFile = gusHome + "/config/" + FILE_CONFIG;
     try {
       properties.load(new FileReader(new File(configFile)));
