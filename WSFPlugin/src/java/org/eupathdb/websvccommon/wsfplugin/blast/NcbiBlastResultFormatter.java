@@ -95,7 +95,7 @@ public class NcbiBlastResultFormatter extends AbstractResultFormatter {
       // get the defline, and get organism from it
       String defline = alignment.substring(0, alignment.indexOf("Length = "));
       String organism = getField(defline, findOrganism(defline));
-      String projectId = projectMapper.getProjectByOrganism(organism);
+      String projectId = getProject(organism);
 
       // get the source id in the alignment, and insert a link there
       int[] sourceIdLocation = findSourceId(alignment);
@@ -147,7 +147,7 @@ public class NcbiBlastResultFormatter extends AbstractResultFormatter {
       }
       // check if any subject has been found
       if (min <= max) {
-        String gb_url = projectMapper.getBaseUrl(projectId);
+        String gb_url = getBaseUrl(projectId);
         gb_url += "/cgi-bin/gbrowse/" + projectId.toLowerCase() + "/?name="
             + sourceId + ":" + min + "-" + max;
         buffer.append("\n<a href=\"" + gb_url + "\"> <B><font color=\"red\">"

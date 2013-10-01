@@ -2,6 +2,7 @@ package org.eupathdb.websvccommon.wsfplugin.blast;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.sql.SQLException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -18,7 +19,7 @@ public abstract class AbstractResultFormatter implements ResultFormatter {
 
   private static final Logger logger = Logger.getLogger(AbstractResultFormatter.class);
 
-  protected ProjectMapper projectMapper;
+  private ProjectMapper projectMapper;
   private BlastConfig config;
 
   @Override
@@ -92,5 +93,13 @@ public abstract class AbstractResultFormatter implements ResultFormatter {
     buffer.append(content.substring(location[0], location[1]));
     buffer.append("</a>").append(content.substring(location[1]));
     return buffer.toString();
+  }
+  
+  protected String getProject(String organism) throws SQLException {
+    return projectMapper.getProjectByOrganism(organism);
+  }
+  
+  protected String getBaseUrl(String projectId) {
+    return projectMapper.getBaseUrl(projectId);
   }
 }
