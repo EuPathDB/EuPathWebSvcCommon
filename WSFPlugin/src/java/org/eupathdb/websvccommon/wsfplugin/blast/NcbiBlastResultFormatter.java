@@ -112,7 +112,7 @@ public class NcbiBlastResultFormatter extends AbstractResultFormatter {
       summary = insertUrl(summary, findSourceId(summary), idUrl);
 
       // insert the gbrowse link if the DB type is genome
-      if (dbType.equals(DB_TYPE_GENOME))
+      if (dbType != null && dbType.equals(DB_TYPE_GENOME))
         alignment = insertGbrowseLink(alignment, projectId, sourceId);
 
       // format and write the row
