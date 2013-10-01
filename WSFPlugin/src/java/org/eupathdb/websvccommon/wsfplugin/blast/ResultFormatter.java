@@ -8,8 +8,6 @@ import org.gusdb.wsf.plugin.WsfPluginException;
 
 public interface ResultFormatter {
 
-  static final String MACRO_SUMMARY = "BLAST_SUMMARY";
-  static final String MACRO_ALIGNMENT = "BLAST_ALIGNMENT";
   static final String newline = System.getProperty("line.separator");
 
   void setConfig(BlastConfig config);

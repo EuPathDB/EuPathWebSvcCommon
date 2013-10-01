@@ -9,6 +9,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.regex.Matcher;
 
+import org.eupathdb.common.model.view.BlastSummaryViewHandler;
 import org.eupathdb.websvccommon.wsfplugin.EuPathServiceException;
 import org.gusdb.wsf.plugin.PluginResponse;
 import org.gusdb.wsf.plugin.WsfPluginException;
@@ -67,11 +68,11 @@ public class NcbiBlastResultFormatter extends AbstractResultFormatter {
           if (lineTrimmed.startsWith("Sequences producing significant alignments")) {
             // found the start of the summary section
             inSummary = true;
-            content.append(newline + MACRO_SUMMARY + newline + newline);
+            content.append(newline + BlastSummaryViewHandler.MACRO_SUMMARY + newline + newline);
           } else if (line.startsWith(">")) {
             // found the first alignment section
             inAlignment = true;
-            content.append(newline + MACRO_ALIGNMENT + newline + newline);
+            content.append(newline + BlastSummaryViewHandler.MACRO_ALIGNMENT + newline + newline);
           }
         }
       }
