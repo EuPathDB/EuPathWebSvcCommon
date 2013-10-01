@@ -45,7 +45,7 @@ public class NcbiBlastResultFormatter extends AbstractResultFormatter {
             // processed
             // with the info from the correlated alignment section.
             String sourceId = getField(line, findSourceId(line));
-            summaries.put(sourceId, line);
+            summaries.put(sourceId, lineTrimmed);
           }
         } else if (inAlignment) {
           if (lineTrimmed.startsWith("Database:")) { // end of alignment section
@@ -64,15 +64,20 @@ public class NcbiBlastResultFormatter extends AbstractResultFormatter {
             alignment.append(line).append(newline);
           }
         } else { // not in summary nor in alignment
-          content.append(line).append(newline);
           if (lineTrimmed.startsWith("Sequences producing significant alignments")) {
             // found the start of the summary section
             inSummary = true;
             content.append(newline + BlastSummaryViewHandler.MACRO_SUMMARY + newline + newline);
+            // read and skip an empty line
+            reader.readLine();
           } else if (line.startsWith(">")) {
             // found the first alignment section
             inAlignment = true;
             content.append(newline + BlastSummaryViewHandler.MACRO_ALIGNMENT + newline + newline);
+            // add the line to the alignment
+            alignment.append(line).append(newline);
+          } else {
+            content.append(line).append(newline);
           }
         }
       }
@@ -104,7 +109,7 @@ public class NcbiBlastResultFormatter extends AbstractResultFormatter {
       int score = Integer.valueOf(getField(summary, findScore(summary)));
 
       // insert id url into the summary
-      insertUrl(summary, findSourceId(summary), idUrl);
+      summary = insertUrl(summary, findSourceId(summary), idUrl);
 
       // insert the gbrowse link if the DB type is genome
       if (dbType.equals(DB_TYPE_GENOME))
