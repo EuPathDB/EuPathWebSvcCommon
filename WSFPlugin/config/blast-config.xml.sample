@@ -8,8 +8,8 @@
     using the new NCBI BLAST+ with old parameter format, the path should
     include "<....>/bin/legacy_blast.pl " in the end. Note that in this
     case, the empty space at the end is needed. -->
-  <!--entry key="BlastPath">/opt/ncbi-blast2/</entry-->
-  <entry key="BlastPath">/opt/WU_BLAST/</entry>
+  <!--entry key="BlastPath">/opt/WU_BLAST/</entry-->
+  <entry key="BlastPath">/opt/ncbi-blast2/bin/</entry>
 
   <!-- Optional, the temporary path for BLAST to make input files
     and save output files. This entry is optional, and "/tmp/blast" as
