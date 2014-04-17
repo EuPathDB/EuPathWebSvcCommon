@@ -94,7 +94,11 @@ public class NcbiBlastResultFormatter extends AbstractResultFormatter {
     try {
       // get the defline, and get organism from it
       String defline = alignment.substring(0, alignment.indexOf("Length = "));
-      String organism = getField(defline, findOrganism(defline));
+			String organism = "none";
+			try { //Ortho does not have organism info in defline
+					organism = getField(defline, findOrganism(defline));
+			}
+			catch (NullPointerException e){}
       String projectId = getProject(organism);
 
       // get the source id in the alignment, and insert a link there
@@ -106,7 +110,7 @@ public class NcbiBlastResultFormatter extends AbstractResultFormatter {
       // get score and e-value from summary;
       String summary = summaries.get(sourceId);
       String evalue = getField(summary, findEvalue(summary));
-      int score = Integer.valueOf(getField(summary, findScore(summary)));
+      int score = Double.valueOf(getField(summary, findScore(summary))).intValue();
 
       // insert id url into the summary
       summary = insertUrl(summary, findSourceId(summary), idUrl);
