@@ -8,7 +8,7 @@ import java.util.Date;
 import java.util.Map;
 
 import org.apache.log4j.Logger;
-import org.apidb.apicommon.model.InstanceManager;
+import org.eupathdb.common.model.InstanceManager;
 import org.eupathdb.common.model.ProjectMapper;
 import org.gusdb.wdk.model.WdkModel;
 import org.gusdb.wdk.model.WdkModelException;
@@ -113,7 +113,7 @@ public abstract class AbstractBlastPlugin extends AbstractPlugin {
 
     // create temporary files for input sequence and output report
     try {
-      WdkModel wdkModel = InstanceManager.getWdkModel(request.getProjectId());
+      WdkModel wdkModel = InstanceManager.getInstance(WdkModel.class, request.getProjectId());
       ProjectMapper projectMapper = ProjectMapper.getMapper(wdkModel);
       resultFormatter.setProjectMapper(projectMapper);
 
