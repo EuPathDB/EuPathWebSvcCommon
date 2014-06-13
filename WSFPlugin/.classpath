@@ -8,6 +8,5 @@
 	<classpathentry combineaccessrules="false" kind="src" path="/WDK Controller"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/EuPath Common Model"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/fgputil-util"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/ApiCommon Web Model"/>
 	<classpathentry kind="output" path="classes"/>
 </classpath>
