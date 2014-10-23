@@ -135,7 +135,7 @@ public class NcbiBlastResultFormatter extends AbstractResultFormatter {
       Map<String, String> summaries, String alignment) throws PluginUserException, PluginModelException {
     try {
       // get the defline, and get organism from it
-      String defline = alignment.substring(0, alignment.indexOf("Length = "));
+      String defline = alignment.substring(0, alignment.indexOf("Length="));
       String organism = "none";
       try { // Ortho does not have organism info in defline
         organism = getField(defline, findOrganism(defline));
@@ -158,7 +158,7 @@ public class NcbiBlastResultFormatter extends AbstractResultFormatter {
       summary = insertUrl(summary, findSourceId(summary), idUrl);
 
       // insert the gbrowse link if the DB type is genome
-      if (dbType != null && dbType.equals(DB_TYPE_GENOME))
+      if (dbType != null && dbType.equals(DB_TYPE_GENOME)) 
         alignment = insertGbrowseLink(alignment, projectId, sourceId);
 
       // format and write the row
@@ -171,14 +171,16 @@ public class NcbiBlastResultFormatter extends AbstractResultFormatter {
   }
 
   private String insertGbrowseLink(String alignment, String projectId, String sourceId) {
-    // logger.debug("insertGBrowseLink: alignment: ********\n" + alignment + "\n*******\n");
+    //logger.debug("\n\ninsertGBrowseLink: alignment: ******************\n" + alignment + "\n****************\n");
     StringBuilder buffer = new StringBuilder();
-    String[] pieces = alignment.split("Strand =");
+    String[] pieces = alignment.split("Strand=");
+
     for (String piece : pieces) {
-      if (buffer.length() > 0)
-        buffer.append("Strand = ");
+      //if (buffer.length() > 0)
+			  // buffer.append("Strand=");
       Matcher matcher = SUBJECT_PATTERN.matcher(piece);
       int min = Integer.MAX_VALUE, max = Integer.MIN_VALUE;
+
       while (matcher.find()) {
         int start = Integer.valueOf(matcher.group(1));
         int end = Integer.valueOf(matcher.group(2));
@@ -199,10 +201,12 @@ public class NcbiBlastResultFormatter extends AbstractResultFormatter {
         buffer.append("\n<a href=\"" + gb_url + "\"> <B><font color=\"red\">" +
             "Link to Genome Browser</font></B></a>,   Strand = ");
       }
-      else if (buffer.length() > 0)
-        buffer.append("Strand = ");
+      else {
+				if (buffer.length() > 0)
+					buffer.append("Strand = ");
+			}
       buffer.append(piece);
-    }
+	  }
     return buffer.toString();
   }
 
