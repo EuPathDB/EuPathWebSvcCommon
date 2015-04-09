@@ -77,6 +77,10 @@ public abstract class AbstractResultFormatter implements ResultFormatter {
     }
   }
 
+  protected String insertUrl(String content, int[] location, String url) {
+    return insertUrl(content, location, url, null);
+  }
+ 
   /**
    * Insert a given url to the specified location, and use the html link tag to
    * wrap around the content at the location.
@@ -86,10 +90,13 @@ public abstract class AbstractResultFormatter implements ResultFormatter {
    * @param url
    * @return
    */
-  protected String insertUrl(String content, int[] location, String url) {
+  protected String insertUrl(String content, int[] location, String url, String anchor) {
     StringBuilder buffer = new StringBuilder();
     buffer.append(content.substring(0, location[0]));
-    buffer.append("<a href=\"").append(url).append("\">");
+    buffer.append("<a ");
+    if (anchor != null) 
+      buffer.append(" name=\"").append(anchor).append("\" ");
+    buffer.append(" href=\"").append(url).append("\">");
     buffer.append(content.substring(location[0], location[1]));
     buffer.append("</a>").append(content.substring(location[1]));
     return buffer.toString();
