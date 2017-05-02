@@ -18,7 +18,7 @@
 
   <target name="EuPathSiteCommon-Checkout" unless="EuPathSiteCommon.present">
     <ant target="defaultProjectCheckout" inheritAll="false">
-      <property name="svnurl" value="https://www.cbil.upenn.edu/svn/apidb/EuPathSiteCommon"/>
+      <property name="svnurl" value="https://cbilsvn.pmacs.upenn.edu/svn/apidb/EuPathSiteCommon"/>
       <property name="project" value="EuPathSiteCommon"/>
       <property name="version" value=""/>
     </ant>
